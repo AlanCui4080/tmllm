@@ -71,6 +71,31 @@ def read(resource_name: str) -> str:
     return resp
 
 
+def read_raw(resource_name: str) -> bytes:
+    """Read raw binary data from the instrument output buffer.
+
+    Unlike ``read()``, this returns bytes without any decoding or stripping.
+    Use this when reading binary waveform data, screenshots, etc.
+    """
+    inst = _get_inst(resource_name)
+    resp = inst.read_raw()
+    logger.debug("[%s] <<< %d bytes raw", resource_name, len(resp))
+    return resp
+
+
+def query_raw(resource_name: str, command: str) -> bytes:
+    """Write a query and return the raw binary response.
+
+    Like ``query()`` but returns bytes instead of a decoded string.
+    Use this for commands that return binary data (e.g., :WAVeform:DATA?).
+    """
+    inst = _get_inst(resource_name)
+    inst.write(command)
+    resp = inst.read_raw()
+    logger.debug("[%s] >>> %s => %d bytes raw", resource_name, command, len(resp))
+    return resp
+
+
 # ── IEEE 488.2 specialized commands ──────────────────────────────
 
 def cls(resource_name: str) -> None:
